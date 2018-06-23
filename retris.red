@@ -1,4 +1,10 @@
-Red [title: "Tetris Redborn!" description: "Red Tetris Game YAY!" file: %retris.red author: @hiiamboris needs: 'view]
+Red [
+    title: "Tetris Redborn!"
+    description: "Red Tetris Game YAY!"
+    file: %retris.red
+    author: @hiiamboris
+    needs: 'view
+]
 
 ; TODO: score board?, resize?, comments!
 
