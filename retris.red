@@ -6,7 +6,7 @@ Red [
     needs: 'view
 ]
 
-; TODO: score board?, resize?, comments!
+; TODO: score board?, resize?, pause?, comments!
 
 now': does [now/time/precise]
 random/seed now'
