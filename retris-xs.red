@@ -12,9 +12,6 @@ if error? bgimg: try/all [
 	load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]
 ] [bgimg: make image! sz/full]
 
-;save/as %bgimg bgimg 'png
-;bgimg: load/as %bgimg 'png
-
 xyloop: func ['p s c /local i] [
 	any [pair? s  s: s/size]
 	i: 0	loop s/x * s/y [
