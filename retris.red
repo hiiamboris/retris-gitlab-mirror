@@ -6,18 +6,18 @@ Red [
     needs: 'view
 ]
 
-; TODO: score board?, resize?, comments!
+; TODO: score board?, resize?, autosnapshots?, comments!
 
 now': does [now/time/precise]
 random/seed now'
 
 sz: context [
-	block: 16x16  map: 20x40
+	block: 16x16  map: 16x32
 	full: map * block
-	line: as-pair full/x block/y
+	band: 1x5 * line: as-pair full/x block/y
 	edge: block/x
 ]
-half-life: 300
+half-life: 60
 if error? bgimg: try/all [
 	load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]
 ] [bgimg: make image! sz/full]
@@ -47,22 +47,22 @@ pieces: collect [
 	]
 ]
 
+grad: collect [foreach x #{FF F0 C8 5A FF} [keep to-tuple rejoin [#{FF FF FF} x]]]
 redraw: function [] [
-	grad: collect [foreach x #{FF F0 C8 5A FF} [keep to-tuple rejoin [#{FF FF FF} x]]]
-	canvas/draw:
-		collect [
-		xyloop o map' [
-		if white <> p: map'/:o [
-			o1: (o2: sz/block * o) - sz/block
-			box: rejoin [[box] o1 o2 sz/edge / 5]
-			fp: 'fill-pen
-			keep compose [
-				pen off  (fp) off (fp) (p)
-				(box)
-	 			pen coal  (fp) radial (grad) (o2) (sz/edge * 1.5)
-				(box)
-			]
-		]]]
+	cmds: clear first stor: [[] []]
+	xyloop o map' [
+	if white <> p: map'/:o [
+		o1: (o2: sz/block * o) - sz/block
+		box: reduce/into ['box o1 o2 sz/edge / 5] clear []
+		fp: 'fill-pen
+		append cmds compose/into [
+			pen off  (fp) off (fp) (p)
+			(box)
+ 			pen coal  (fp) radial (grad) (o2) (sz/edge * 1.5)
+			(box)
+		] clear []
+	]]
+	canvas/draw: last reverse stor
 ]
 
 draw-pc: has [o] [
@@ -76,7 +76,7 @@ draw-pc: has [o] [
 ]
 
 imprint: has [o p r] [
-	map': copy map
+	draw map' [image map]
 	r: xyloop o pc [
 		if white <> pc/:o [
 			p: o + pc-pos
@@ -91,7 +91,7 @@ imprint: has [o p r] [
 
 rotate: has [p] [
 	p: copy pc
-	draw pc compose/deep [matrix [0 1 -1 0 (p/size/x) 0] image p]
+	draw pc compose/deep/into [matrix [0 1 -1 0 (p/size/x) 0] image p] clear []
 	if 'bad = imprint [pc: p  imprint]
 ]
 
@@ -100,7 +100,7 @@ advance: func [by /force /local bk] [
 		pc-pos: by + bk: pc-pos
 		if 'bad = imprint [
 			pc-pos: bk
-			if 0 <> by/y [imprint  map: map'  draw-pc]
+			if 0 <> by/y [imprint  draw map [image map']  draw-pc]
 			break
 		]
 		not force
@@ -108,7 +108,8 @@ advance: func [by /force /local bk] [
 	imprint
 ]
 
-clean: has [x y h ln] [
+clean: has [x y h ln mul] [
+	mul: 0
 	repeat y h: sz/map/y [
 		ln: lines/:y
 		if repeat x sz/map/x [
@@ -116,8 +117,8 @@ clean: has [x y h ln] [
 			yes
 		] [
 			if 0 = ln/extra: ln/extra + 1 % 7 [
-				draw map compose [image map crop 0x-1 (as-pair h y)]
-				rea/score: rea/score + 100
+				draw map compose/into [image map crop 0x-1 (as-pair h y)] clear []
+				rea/score: 100 * (mul: mul + 1) + rea/score
 			]
 			ln/visible?: make logic! ln/extra % 2
 		]
@@ -125,7 +126,8 @@ clean: has [x y h ln] [
 ]
 
 game-over: does [
-	view compose [
+	rea/pause: yes
+	view [
 		text center wrap 160x100 font-size 30 "GAME OVER"
 		return
 		button 70x30 focus "Restart" [restart unview]
@@ -134,46 +136,57 @@ game-over: does [
 ]
 
 restart: does [start  draw-pc]
-start: does [t0: now'  set rea rea'  map': map: make image! sz/map]
+start: does [set rea rea'  map': copy map: make image! sz/map]
 
 lines: []
 whit2: to-tuple #{FFFFFFFF}
 cyan2: to-tuple #{00FFFF80}
-rea': copy rea: make reactor! [elapsed: 0:0:0  score: 0  diff: 1.0]
+rea': copy rea: make reactor! [
+	elapsed: 0:0:0  score: 0  pause: no  t0: is [elapsed pause now']
+	interval: is [(atan (to-float elapsed) / half-life) / (pi / -2) + 1.0]
+]
 
 start
 
-view/tight/options compose/deep [
-	base (sz/full)
+wnd: view/tight/options/no-wait compose/deep [
+	game: base (sz/full)
 		draw [image (bgimg)]
 		focus on-key [
 			k: event/key
-			keys: func [s b] [ any [find s k find b k] ]
+			keys: quote (func [s b] [ any [find s k find b k] ])
 			case [
 				i: keys "246sad" [down left right]
 					[advance pick [0x1 -1x0 1x0] -1 + ([(index? i)]) % 3 + 1]
-				keys " 0" [insert]
+				keys " 0" [insert] 
 					[advance/force 0x1]
 				keys "^M58w" [up enter]
 					[rotate]
+				keys "^[" []
+					[rea/pause: not rea/pause]
 			]
 		]
 		rate 0:0:1 on-time [
-			advance 0x1
-			face/rate: ([ (rea/diff: 0.5 ** (to-float (rea/elapsed: now' - t0) / half-life)) * 0:0:1 ])
+			unless rea/pause [
+				advance 0x1
+				rea/elapsed: rea/elapsed + modulo now' - rea/t0 24:0:0
+				face/rate: rea/interval * 0:0:1
+			]
 		]
 
 	return
-	sc: text (sz/line * 1x5 * 0.6) center font-size 20 
-		react [sc/data: reduce ["Score:" rea/score]]
+	text (sz/line * 1x4 * 0.6) center font-size 20
+		react [face/data: reduce/into ["Score:" rea/score] clear []]
 	
-	nfo: text (sz/line * 1x7 * 0.4) font-size 12
-		react [nfo/data: reduce ["Time:" round rea/elapsed "^/Difficulty:" round 100% - rea/diff]]
+	text (sz/line * 1x6 * 0.4) font-size 11
+		react [face/data: reduce/into ["Time:" round rea/elapsed "^/Difficulty:" round -10% * log-2 rea/interval] clear []]
 
 	at 0x0 canvas: base (sz/full) glass
 		on-created [restart]
-		rate 15 on-time [clean]
+		react [face/rate: all [not rea/pause 30]] on-time [clean]
 	
+	at (sz/full - sz/band / 2 * 0x1) base (sz/band) glass coffee bold font-size 30 "Taking a breath..."
+		react [face/visible?: rea/pause]
+
 	style line: base hidden glass (sz/line) extra 0
 		on-create [append lines face]
 		draw [
@@ -183,4 +196,6 @@ view/tight/options compose/deep [
 	(repeat i sz/map/y [append [] reduce ['at i - 1 * sz/edge * 0x1 'line]])
 ] [text: "Retris"]
 
-quit
+either error? e: try/all [do-events]
+	[ view compose [area (form e)] ]
+	[ quit ]
