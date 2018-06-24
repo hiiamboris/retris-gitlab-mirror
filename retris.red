@@ -178,7 +178,7 @@ wnd: view/tight/options/no-wait compose/deep [
 		react [face/data: reduce/into ["Score:" rea/score] clear []]
 	
 	text (sz/line * 1x6 * 0.4) font-size 11
-		react [face/data: reduce/into ["Time:" round rea/elapsed "^/Difficulty:" round -10% * log-2 rea/interval] clear []]
+		react [face/data: reduce/into ["Time:" round rea/elapsed "^/Difficulty:" round 10% * -1 * log-2 rea/interval] clear []]
 
 	at 0x0 canvas: base (sz/full) glass
 		on-created [restart]
