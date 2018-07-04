@@ -3,10 +3,11 @@ Red [
     description: "Red Tetris Game YAY!"
     file: %retris.red
     author: @hiiamboris
+    license: 'MIT
     needs: 'view
 ]
 
-; TODO: score board?, resize?, autosnapshots?, comments!
+; TODO: resize?, autosnapshots?, comments!
 
 now': does [now/time/precise]
 random/seed now'
@@ -16,11 +17,13 @@ sz: context [
 	full: map * block
 	band: 1x5 * line: as-pair full/x block/y
 	edge: block/x
+	alpha: size-text/with system/view/screens/1 "O"
 ]
 half-life: 60
-if error? bgimg: try/all [
+user: get-env either system/platform = 'windows ['username]['user]
+bgimg: any [attempt/safer [
 	load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]
-] [bgimg: make image! sz/full]
+] make image! sz/full]
 
 xyloop: func ['p s c /local i] [
 	any [pair? s  s: s/size]
@@ -125,25 +128,56 @@ clean: has [x y h ln mul] [
 	]
 ]
 
-game-over: does [
+json-escape: func [s] [ cs: charset [0 - 20 "\^""]  parse s [any [p: cs (insert p "\") skip | skip]]  s ]
+update-hof: has [wnd] [
+	wnd: view/no-wait [h5 "Please wait a sec..."]
+	write/info https://gitlab.com/api/v4/snippets/1730317
+		reduce ['PUT [PRIVATE-TOKEN: "TamaPeMajqEuohv4_Ycw" Content-Type: "application/json"]
+			rejoin [{^{"content": "} json-escape mold rea/scores {"^}}]]
+	unview/only wnd
+]
+read-hof: does [load https://gitlab.com/snippets/1730317/raw]
+
+game-over: has [lowest] [
 	rea/pause: yes
-	view [
-		text center wrap 160x100 font-size 30 "GAME OVER"
-		return
-		button 70x30 focus "Restart" [restart unview]
-		button 70x30 "Quit" [quit]
+	rea/scores: any [attempt/safer [read-hof] []]
+	lowest: pick tail rea/scores -2
+	if any [lowest < rea/score  20 > length? rea/scores] [
+		view compose/deep [
+			h3 "You've entered the Top 10!" return
+			h5 "Enter your name:"
+			field center (user) react [user: face/text]
+			button "Ha! Worship me!" [unview]
+		]
+		repend rea/scores [rea/score user]
+		any [attempt/safer [update-hof]  append user " (unable to save)"]
 	]
+	
+	view compose/deep/only [
+		panel [
+			h1 center wrap (sz/alpha * 16x8) "GAME OVER" return
+			button (sz/alpha * 8x2) focus "Restart" [unview]
+			button (sz/alpha * 8x2) "Quit" [quit]
+		]
+		panel [
+			h5 "Hall of Fame:" return
+			text-list (sz/alpha * 14x10) data
+				(collect [ i: 0 foreach [sc u] rea/scores [keep rejoin [i: i + 1 ". " u " with " sc]] ])
+		]
+	]
+	restart
 ]
 
 restart: does [start  draw-pc]
-start: does [set rea rea'  map': copy map: make image! sz/map]
+start: does [set rea rea'  rea/t0: now'  map': copy map: make image! sz/map]
 
 lines: []
 whit2: to-tuple #{FFFFFFFF}
 cyan2: to-tuple #{00FFFF80}
-rea': copy rea: make reactor! [
+rea': copy rea: make deep-reactor! [
 	elapsed: 0:0:0  score: 0  pause: no  t0: is [elapsed pause now']
 	interval: is [(atan (to-float elapsed) / half-life) / (pi / -2) + 1.0]
+	scores: []  scores: is [head clear skip sort/skip/reverse scores 2 20]
 ]
 
 start
@@ -173,18 +207,21 @@ wnd: view/tight/options/no-wait compose/deep [
 			]
 		]
 
-	return
-	text (sz/line * 1x4 * 0.6) center font-size 20
+	return middle
+	h4 "Score: 00000" center
 		react [face/data: reduce/into ["Score:" rea/score] clear []]
-	
-	text (sz/line * 1x6 * 0.4) font-size 11
-		react [face/data: reduce/into ["Time:" round rea/elapsed "^/Difficulty:" round 10% * -1 * log-2 rea/interval] clear []]
+
+	text (sz/alpha * 12x3) font-size 11
+		react [face/data: reduce/into [
+			"Time:" round rea/elapsed "^/Difficulty:" round 10% * -1 * log-2 rea/interval
+		] clear []]
 
 	at 0x0 canvas: base (sz/full) glass
 		on-created [restart]
 		react [face/rate: all [not rea/pause 30]] on-time [clean]
 	
-	at (sz/full - sz/band / 2 * 0x1) base (sz/band) glass coffee bold font-size 30 "Taking a breath..."
+	at (sz/full - sz/band / 2 * 0x1)
+		base (sz/band) glass coffee bold font-size 30 "Taking a breath..."
 		react [face/visible?: rea/pause]
 
 	style line: base hidden glass (sz/line) extra 0
