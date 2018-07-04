@@ -1,4 +1,4 @@
-Red [title: "Tetris Redborn XS!" description: "Minimal version of Retris" file: %retris-xs.red author: @hiiamboris needs: 'view]
+Red [title: "Tetris Redborn XS!" description: "Minimal version of Retris" license: 'MIT author: @hiiamboris needs: 'view]
 
 random/seed now/precise/time
 
@@ -8,9 +8,10 @@ sz: context [
 	line: as-pair full/x block/y
 ]
 
-if error? bgimg: try/all [
-	load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]
-] [bgimg: make image! sz/full]
+bgimg: any [
+	attempt/safer [load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]]
+	make image! sz/full
+]
 
 xyloop: func ['p s c /local i] [
 	any [pair? s  s: s/size]
