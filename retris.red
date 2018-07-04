@@ -35,7 +35,7 @@ xyloop: func ['p s c /local i] [
 
 pieces: collect [
 	foreach spec [
-		[cyan "" "" "++++" "" ""]
+		[cyan "  +" "  +" "  +" "  +" ""]
 		[blue "+" "+++" ""]
 		[brown "  +" "+++" ""]
 		[yellow "++" "++"]
@@ -54,24 +54,29 @@ grad: collect [foreach x #{FF F0 C8 5A FF} [keep to-tuple rejoin [#{FF FF FF} x]
 redraw: function [] [
 	cmds: clear first stor: [[] []]
 	xyloop o map' [
-	if white <> p: map'/:o [
 		o1: (o2: sz/block * o) - sz/block
 		box: reduce/into ['box o1 o2 sz/edge / 5] clear []
-		fp: 'fill-pen
-		append cmds compose/into [
-			pen off  (fp) off (fp) (p)
-			(box)
- 			pen coal  (fp) radial (grad) (o2) (sz/edge * 1.5)
-			(box)
-		] clear []
-	]]
+		fp: 'fill-pen  pfx: compose [pen off  (fp) off (fp)]
+		grid: o/x + o/y % 2 * 2 - 1 * 40.40.40.0 + 99.99.130.140
+		append cmds compose/into either white = p: map'/:o
+			[[ (pfx) (grid) box (o1) (o2) ]]
+			[[ (pfx) (p) (box)  pen coal (fp) radial (grad) (o2) (sz/edge * 1.5)  (box) ]]
+			clear []
+	]
 	canvas/draw: last reverse stor
 ]
 
+redraw-next: function [pc] [
+	also append cmds: clear [] [pen sienna text 0x0 "next:" pen off]
+	if pc [xyloop o pc [if white <> p: pc/:o [
+		o1: (o2: o + 1x2 * sz/block * 0.7) - (sz/block * 0.7)
+		append cmds compose/into [fill-pen (p + 0.0.0.120) box (o1) (o2)] clear []
+	]]]
+]
+
 draw-pc: has [o] [
-	pc: random/only pieces
-	o: -3
-	until [
+	pc: until [also  attempt [rea/next-pc]  rea/next-pc: random/only pieces]
+	o: -3  until [
 		pc-pos: as-pair sz/map/x - pc/size/x + 1 / 2 o
 		if 3 < o: o + 1 [game-over]
 		'bad <> imprint
@@ -175,7 +180,7 @@ lines: []
 whit2: to-tuple #{FFFFFFFF}
 cyan2: to-tuple #{00FFFF80}
 rea': copy rea: make deep-reactor! [
-	elapsed: 0:0:0  score: 0  pause: no  t0: is [elapsed pause now']
+	elapsed: 0:0:0  score: 0  pause: no  t0: is [elapsed pause now']  next-pc: none
 	interval: is [(atan (to-float elapsed) / half-life) / (pi / -2) + 1.0]
 	scores: []  scores: is [head clear skip sort/skip/reverse scores 2 20]
 ]
@@ -219,6 +224,8 @@ wnd: view/tight/options/no-wait compose/deep [
 	at 0x0 canvas: base (sz/full) glass
 		on-created [restart]
 		react [face/rate: all [not rea/pause 30]] on-time [clean]
+
+	at 0x0 base (sz/block * 4) glass react [face/draw: redraw-next rea/next-pc]
 	
 	at (sz/full - sz/band / 2 * 0x1)
 		base (sz/band) glass coffee bold font-size 30 "Taking a breath..."

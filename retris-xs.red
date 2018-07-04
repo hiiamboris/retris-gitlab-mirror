@@ -3,7 +3,7 @@ Red [title: "Tetris Redborn XS!" description: "Minimal version of Retris" licens
 random/seed now/precise/time
 
 sz: context [
-	block: 16x16  map: 20x40
+	block: 16x16  map: 16x32
 	full: map * block
 	line: as-pair full/x block/y
 ]
@@ -89,10 +89,7 @@ clean: has [x y h] [
 	]
 ]
 
-restart: does [start  draw-pc]
 start: does [map': map: make image! sz/map]
-
-start
 
 view/tight/options compose/deep [
 	base (sz/full)
@@ -104,8 +101,8 @@ view/tight/options compose/deep [
 			right [advance 1x0]
 			#" " [advance/force 0x1]
 			up [rotate]
-		] ]
-	return at 0x0 canvas: base (sz/full) glass  on-created [restart]  rate 10 on-time [clean]
+		] ] return
+	at 0x0 canvas: base (sz/full) glass  on-created [start draw-pc]  rate 10 on-time [clean]
 ] [text: "Retris Mini"]
 
 quit
