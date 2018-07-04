@@ -7,10 +7,11 @@
 <tr> <td> retris.red <td> <b>The original, including: </b><ul>
     <li> Score calculation & Hall of Fame
     <li> Difficulty increase
-    <li> Stats display
+    <li> Stats & next piece display
     <li> Ability to Pause & Restart
     <li> Support of various sets of keys (WASD, Digits)
     <li> Standard-compliant piece rotation & positioning
+    <li> Grid for better snapping
     <li> Fancier graphics
     <li> RAM usage optimizations (in the lack of GC)
     </ul> <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris.exe">binary/win32</a>
