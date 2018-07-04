@@ -11,6 +11,7 @@
     <li> Ability to Pause & Restart
     <li> Support of various sets of keys (WASD, Digits)
     <li> Standard-compliant piece rotation & positioning
+    <li> Fancier graphics
     <li> RAM usage optimizations (in the lack of GC)
     </ul> <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris.exe">binary/win32</a>
 <tr> <td> retris-xs.red <td>
