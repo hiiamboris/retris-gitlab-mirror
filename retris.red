@@ -8,25 +8,26 @@ Red [
 ]
 
 ; TODO: resize?, autosnapshots?, clear KB buffer between piece drops, comments!
-
 now': does [now/time/precise]
 random/seed now'
 
 half-life: 60
 sz: context [
-	block': 0.7 * block: 16x16
-	full: block * map: 16x32
-	band: 1x5 * line: as-pair full/x block/y
-	edge: block/x
+	■': block': 0.7 * ■: block: 16x16
+	full: ■ * map: 16x32
+	band: 1x5 * line: as-pair full/x ■/y
+	edge: ■/x
 	alpha: size-text/with system/view/screens/1 "O"
 ]
-block': rejoin [block: reduce ['box 0x0 sz/block] sz/edge / 5]
+block': rejoin [block: reduce ['box 0x0 sz/■] sz/edge / 5]
 
 user: get-env either system/platform = 'windows ['username]['user]
-bgimg: any [attempt/safer [
-	load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]
-] make image! sz/full]
+bgimg: any [
+	attempt/safer [ load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random] ]
+	make image! sz/full
+]
 
+→: make op! func [exp tgt] [compose/deep/into exp clear tgt]
 xyloop: func ['p s c /local i] [
 	any [pair? s  s: s/size]
 	i: 0	loop s/x * s/y [
@@ -35,33 +36,30 @@ xyloop: func ['p s c /local i] [
 	i: i + 1	]
 ]
 
-pieces: collect [
-	foreach spec [
-		[cyan "  +" "  +" "  +" "  +" ""]
-		[blue "+" "+++" ""]
-		[brown "  +" "+++" ""]
-		[yellow "++" "++"]
-		[green " ++" "++" ""]
-		[purple " +" "+++" ""]
-		[red "++" " ++" ""]
-	] [
-		c: get spec/1
-		w: length? spec: next spec
-		keep p: make image! 1x1 * w
-		xyloop o p [ if #"+" = spec/(o/y)/(o/x) [p/:o: c] ]
-	]
-]
+pieces: collect [	foreach spec [
+	[cyan "  +" "  +" "  +" "  +" ""]
+	[blue "+" "+++" ""]
+	[brown "  +" "+++" ""]
+	[yellow "++" "++"]
+	[green " ++" "++" ""]
+	[purple " +" "+++" ""]
+	[red "++" " ++" ""]
+][
+	w: length? spec: next spec
+	keep p: make image! 1x1 * w
+	xyloop o p [ if #"+" = spec/(o/y)/(o/x) [p/:o: get spec/-1] ]
+]]
 
-grad: collect [foreach x #{FF F0 C8 5A FF} [keep to-tuple rejoin [#{FF FF FF} x]]]
-draw sheen: make image! reduce [sz/block glass] compose [
-	pen coal fill-pen radial (grad) (sz/block) (sz/edge * 1.5) (block')
+grad: collect [foreach x #{FF F0 C8 5A FF} [keep 0.0.0.1 * x + white]]
+draw sheen: make image! reduce [sz/■ glass] compose [
+	pen coal fill-pen radial (grad) (sz/■) (sz/edge * 1.5) (block')
 ]
 
 blkdraw: compose [(block') image sheen]
 redraw: function [] [
 	cmds: append clear first stor: [[] []] [pen off]
 	xyloop o map' [if white <> p: map'/:o [
-		compose/only/into [ fill-pen (p) translate (o - 1x1 * sz/block) (blkdraw) ] tail cmds
+		[ fill-pen (p) translate (o - 1x1 * sz/■) [(blkdraw)] ] → tail cmds
 	]]
 	canvas/draw: last reverse stor
 ]
@@ -69,9 +67,8 @@ redraw: function [] [
 redraw-next: function [pc] [
 	also append cmds: clear [] [pen sienna text 5x0 "next:" pen off]
 	if pc [xyloop o pc [if white <> p: pc/:o [
-		compose/deep/into
-			[fill-pen (p + 0.0.0.120) translate (o + -1x1 * sz/block' + 5x5) [box 0x0 (sz/block')]]
-			tail cmds
+		[fill-pen (p + 0.0.0.120) translate (o + -1x1 * sz/■' + 5x5) [box 0x0 (sz/■')]]
+		→ tail cmds
 	]]]
 ]
 
@@ -98,7 +95,7 @@ imprint: has [o p r] [
 
 rotate: has [p] [
 	p: copy pc
-	draw pc compose/deep/into [matrix [0 1 -1 0 (p/size/x) 0] image p] clear []
+	draw pc [matrix [0 1 -1 0 (p/size/x) 0] image p] → []
 	if 'bad = imprint [pc: p  imprint]
 ]
 
@@ -116,16 +113,14 @@ advance: func [by /force /local prev-pos] [
 ]
 
 clean: has [x y h ln mul] [
-	mul: 0
 	repeat y h: sz/map/y [
-		ln: lines/:y
 		if repeat x sz/map/x [
-			if white = map/(as-pair x y) [break/return no]
-			yes
+			also yes  if white = map/(as-pair x y) [break/return no]
 		] [
+			ln: lines/:y
 			if 0 = ln/extra: ln/extra + 1 % 7 [
-				draw map compose/into [image map crop 0x-1 (as-pair h y)] clear []
-				rea/score: 100 * (mul: mul + 1) + rea/score
+				draw map [image map crop 0x-1 (as-pair h y)] → []
+				rea/score: 100 * (mul: any [mul 0] + 1) + rea/score
 			]
 			ln/visible?: make logic! ln/extra % 2
 		]
@@ -133,14 +128,14 @@ clean: has [x y h ln mul] [
 ]
 
 json-escape: func [s] [ cs: charset [0 - 20 "\^""]  parse s [any [p: cs (insert p "\") skip | skip]]  s ]
+read-hof: does [load https://gitlab.com/snippets/1730317/raw]
 update-hof: does [
-	unview also view/no-wait/flags [h5 "Please wait a sec..."][modal no-title]
+	unview/only also view/no-wait/flags [h5 "Please wait a sec..."][modal no-title]
 		write/info https://gitlab.com/api/v4/snippets/1730317
 			reduce ['PUT [PRIVATE-TOKEN: "TamaPeMajqEuohv4_Ycw" Content-Type: "application/json"]
 				rejoin [{^{"content": "} json-escape mold rea/scores {"^}}]]
 	'ok
 ]
-read-hof: does [load https://gitlab.com/snippets/1730317/raw]
 
 game-over: has [lowest saved] [
 	rea/pause: saved: yes
@@ -152,11 +147,11 @@ game-over: has [lowest saved] [
 			h5 "Enter your name:"
 			field center (user) react [user: face/text]
 			button focus "Ha! Worship me!" [unview]
-		][modal][text: "Top Score!"]
+		] [modal] [text: "Top Score!"]
 		repend rea/scores [rea/score user]
 		saved: attempt/safer [update-hof]
 	]
-	view/flags/options compose/deep/only [
+	view/flags/options [
 		panel [
 			h1 center wrap (sz/alpha * 16x8) "GAME OVER" return
 			button (sz/alpha * 8x2) focus "Restart" [unview]
@@ -165,9 +160,9 @@ game-over: has [lowest saved] [
 		panel [
 			h5 "Hall of Fame:" return
 			text-list (sz/alpha * 18x10) data
-				(collect [ i: 0 foreach [sc u] rea/scores [keep rejoin [i: i + 1 ". " u " with " sc]] ])
+				[(collect [ i: 0 foreach [sc u] rea/scores [keep rejoin [i: i + 1 ". " u " with " sc]] ])]
 		]
-	][modal][ text: form reduce ["Hall of Fame" either saved [""]["(unable to save)"]] ]
+	] → [] [modal][ text: form reduce ["Hall of Fame" either saved [""]["(unable to save)"]] ]
 	restart
 ]
 
@@ -181,7 +176,8 @@ rea': copy rea: make deep-reactor! [
 ]
 
 start
-view/tight/options/no-wait compose/deep [
+view/tight/options/no-wait [
+	style base': base glass coffee
 	game: base (sz/full) (bgimg)
 		focus on-key [
 			k: event/key
@@ -200,37 +196,36 @@ view/tight/options/no-wait compose/deep [
 		]
 
 	return middle
-	h4 "Score: 00000" center
-		react [reduce/into ["Score:" rea/score] clear face/data: []]
+	h4 "Score: 00000" center react [["Score:" ([(rea/score)])] → face/data: []]
+	text (sz/alpha * 12x3) font-size 11	react [
+		["Time:" ([(round rea/elapsed)]) "^/Difficulty:" ([(round 10% * -1 * log-2 rea/interval)])]
+		→ face/data: []
+	]
 
-	text (sz/alpha * 12x3) font-size 11
-		react [reduce/into [
-			"Time:" round rea/elapsed "^/Difficulty:" round 10% * -1 * log-2 rea/interval
-		] clear face/data: []]
-
-	at 0x0 image (also grid: make image! reduce [sz/full glass]
+	at 0x0 image (
+		also grid: make image! reduce [sz/full glass]
 		xyloop o sz/map [
 			c: o/x + o/y % 2 * 2 - 1 * 40.40.40.0 + 99.99.130.140
-			draw grid compose/only [pen off fill-pen (c) translate (o - 1x1 * sz/block) (block)]
+			draw grid [pen off fill-pen (c) translate (o - 1x1 * sz/■) [(block)]] → []
 		])
 
-	at 0x0 base (sz/block * 5x7) glass react [face/draw: redraw-next rea/next-pc]
+	at 0x0 base' (sz/■ * 5x7) react [face/draw: redraw-next rea/next-pc]
 
-	at 0x0 canvas: base (sz/full) glass on-created [restart]
+	at 0x0 canvas: base' (sz/full) on-created [restart]
 		react [face/rate: all [not rea/pause 50]] on-time [clean]
 
 	at (sz/full - sz/band / 2 * 0x1)
-		base (sz/band) glass coffee bold font-size 30 "Taking a breath..."
+		base' (sz/band) bold font-size 30 "Taking a breath..."
 		react [face/visible?: rea/pause]
 
-	style line: base hidden glass (sz/line) extra 0
-		on-create [append lines face] (lines: [])
+	style line: base' hidden (sz/line) extra 0 (lines: [])
+		on-create [face/offset: sz/edge * 0x1 * length? lines  append lines face]
 		draw [
 			fill-pen linear (white + 0.0.0.255) (cyan + 0.0.0.128) 0.6 white 0x0 (sz/edge * 0x1 / 2) reflect
 			pen off  box 0x0 (sz/line)
 		]
-	(repeat i sz/map/y [append [] reduce ['at i - 1 * sz/edge * 0x1 'line]])
-] [text: "Retris"]
+	(append/dup [] [at 0x0 line] sz/map/y)
+] → [] [text: "Retris"]
 
 either error? e: try/all [do-events]
 	[ view compose [area (form e)] ]
