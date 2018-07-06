@@ -120,7 +120,7 @@ clean: has [x y h ln mul] [
 			ln: lines/:y
 			if 0 = ln/extra: ln/extra + 1 % 7 [
 				draw map [image map crop 0x-1 (as-pair h y)] → []
-				rea/score: 100 * (mul: any [mul 0] + 1) + rea/score
+				probe rea/score: 100 * (probe mul: 1 + any [mul 0]) + probe rea/score
 			]
 			ln/visible?: make logic! ln/extra % 2
 		]
@@ -196,7 +196,7 @@ view/tight/options/no-wait [
 		]
 
 	return middle
-	h4 "Score: 00000" center react [["Score:" ([(rea/score)])] → face/data: []]
+	h4 "Score: 00000" center react [face/data: ["Score:" ([(rea/score)])] → []]
 	text (sz/alpha * 12x3) font-size 11	react [
 		["Time:" ([(round rea/elapsed)]) "^/Difficulty:" ([(round 10% * -1 * log-2 rea/interval)])]
 		→ face/data: []
