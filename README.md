@@ -3,7 +3,7 @@
 <td><h1>RETRIS -- RED-lang Tetris Demo</h1>
 <br><h2>FILES</h2>
 <table>
-<tr> <td> File <td> Description <td> Binary
+<tr> <td> File <td> Description <td> Binary<a href="#footnote1">*</a>
 <tr> <td> retris.red <td> <b>The original, including: </b><ul>
     <li> Score calculation & Hall of Fame
     <li> Difficulty increase
@@ -20,5 +20,6 @@
     <br>It's kept at the very minimum and does not include any of the advanced features
     <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris-xs.exe">binary/win32</a>
 </table>
+<p id="footnote1"><small>* graphics support on other platforms doesn't yet allow running Retris</small></p>
 </tr></table>
 
