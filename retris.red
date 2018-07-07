@@ -1,7 +1,6 @@
 Red [
     title: "Tetris Redborn!"
     description: "Red Tetris Game YAY!"
-    file: %retris.red
     author: @hiiamboris
     license: 'MIT
     needs: 'view
@@ -16,10 +15,9 @@ sz: context [
 	■': block': 0.7 * ■: block: 16x16
 	full: ■ * map: 16x32
 	band: 1x5 * line: as-pair full/x ■/y
-	edge: ■/x
 	alpha: size-text/with system/view/screens/1 "O"
 ]
-block': rejoin [block: reduce ['box 0x0 sz/■] sz/edge / 5]
+block': rejoin [block: reduce ['box 0x0 sz/■] sz/■/x / 5]
 
 user: get-env either system/platform = 'windows ['username]['user]
 bgimg: any [
@@ -52,7 +50,7 @@ pieces: collect [	foreach spec [
 
 grad: collect [foreach x #{FF F0 C8 5A FF} [keep 0.0.0.1 * x + white]]
 draw sheen: make image! reduce [sz/■ glass] compose [
-	pen coal fill-pen radial (grad) (sz/■) (sz/edge * 1.5) (block')
+	pen coal fill-pen radial (grad) (sz/■) (sz/■/x * 1.5) (block')
 ]
 
 blkdraw: compose [(block') image sheen]
@@ -120,7 +118,7 @@ clean: has [x y h ln mul] [
 			ln: lines/:y
 			if 0 = ln/extra: ln/extra + 1 % 7 [
 				draw map [image map crop 0x-1 (as-pair h y)] → []
-				probe rea/score: 100 * (probe mul: 1 + any [mul 0]) + probe rea/score
+				rea/score: 100 * (mul: 1 + any [mul 0]) + rea/score
 			]
 			ln/visible?: make logic! ln/extra % 2
 		]
@@ -219,9 +217,9 @@ view/tight/options/no-wait [
 		react [face/visible?: rea/pause]
 
 	style line: base' hidden (sz/line) extra 0 (lines: [])
-		on-create [face/offset: sz/edge * 0x1 * length? lines  append lines face]
+		on-create [face/offset: sz/■/x * 0x1 * length? lines  append lines face]
 		draw [
-			fill-pen linear (white + 0.0.0.255) (cyan + 0.0.0.128) 0.6 white 0x0 (sz/edge * 0x1 / 2) reflect
+			fill-pen linear (white + 0.0.0.255) (cyan + 0.0.0.128) 0.6 white 0x0 (sz/■/x * 0x1 / 2) reflect
 			pen off  box 0x0 (sz/line)
 		]
 	(append/dup [] [at 0x0 line] sz/map/y)
