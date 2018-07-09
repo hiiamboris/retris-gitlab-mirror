@@ -4,7 +4,7 @@
 <br><h2>FILES</h2>
 <table>
 <tr> <td> File <td> Description <td> Binary<a href="#footnote1">*</a>
-<tr> <td> retris.red <td> <b>The original, including: </b><ul>
+<tr> <td> retris.red <td> <b>The 220-line original, including: </b><ul>
     <li> Score calculation & Hall of Fame
     <li> Difficulty increase
     <li> Stats & next piece display
