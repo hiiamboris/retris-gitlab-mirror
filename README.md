@@ -20,6 +20,8 @@
     <br>It's kept at the very minimum and does not include any of the advanced features
     <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris-xs.exe">binary/win32</a>
 </table>
-<p id="footnote1"><small>* graphics support on other platforms doesn't yet allow running Retris</small></p>
+<p id="footnote1"><small>* graphics support on other platforms doesn't yet allow running Retris. YOU can help by isolating the problems and <a href="https://github.com/red/red/issues/new">filing new tickets</a></small></p>
+<br><h2>TESTING</h2>
+In case any problem occurs in the binary, try downloading the source and executing `do %retris.red` from the Red console. You can raise issues in this repo or <a href="https://gitter.im/hiiamboris">chat me in Gitter</a>.
 </tr></table>
 
