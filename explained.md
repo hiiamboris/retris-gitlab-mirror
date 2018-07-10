@@ -141,7 +141,7 @@ pieces: collect [	foreach spec [
 ```
 ▲ [`spec`](#spec) contains all the **tetrominoes definitions**. Color *name*, then line-by-line layout. For example: 	`[blue "+" "+++" ""]` is a 3x3 tetromino that I could express like:
 <small>
-> ```
+```
 [blue
 "+  "
 "+++"
@@ -149,6 +149,7 @@ pieces: collect [	foreach spec [
 ```
 
 </small>You can see it's a `J`, but in the code I omitted the extra spaces since I'm only concerned about `+`s.
+
 <br>
 ▼ [`foreach`](#spec) loop **transforms each** spec line into a **separate image**:
 ```
