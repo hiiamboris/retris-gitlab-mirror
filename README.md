@@ -4,7 +4,7 @@
 <br><h2>FILES</h2>
 <table>
 <tr> <td> File <td> Description <td> Binary<a href="#footnote1">*</a>
-<tr> <td> retris.red <td> <b>The 210-line original, including: </b><ul>
+<tr> <td> <a href="https://gitlab.com/hiiamboris/retris/raw/master/retris.red">retris.red</a> <td> <b>The 210-line original, including: </b><ul>
     <li> Score calculation & Hall of Fame
     <li> Difficulty increase
     <li> Stats & next piece display
@@ -15,7 +15,7 @@
     <li> Fancier graphics
     <li> RAM usage optimizations (in the lack of GC)
     </ul> <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris.exe">binary/win32</a>
-<tr> <td> retris-xs.red <td>
+<tr> <td> <a href="https://gitlab.com/hiiamboris/retris/raw/master/retris-xs.red">retris-xs.red</a> <td>
     <b>The minified 100-line version</b>
     <br>It's kept at the very minimum and does not include any of the advanced features
     <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris-xs.exe">binary/win32</a>
