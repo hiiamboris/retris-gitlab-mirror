@@ -113,7 +113,7 @@ clean: function [] [
 				draw map [image map crop 0x-1 (as-pair h y)] → []
 				rea/score: 100 * (mul: 1 + any [mul 0]) + rea/score
 			]
-			ln/visible?: make logic! ln/extra % 2
+			ln/visible?: ln/extra % 2 = 1
 		]
 	]
 ]
