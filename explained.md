@@ -86,7 +86,7 @@ block': rejoin [block: reduce ['box 0x0 sz/■] sz/■/x / 5]
 ▲ These are draw dialect commands that will draw: a square (`block`) and a rounded square (`block'`). I'm gonna inline them a few times later. `block` will be smth like `[box 0x0 16x16]`, `block'` - like `[box 0x0 16x16 3]` (the last digit is the rounding radius).
 
 <br>
-<p id="username"></p>
+<a id="username" name="username"></a>
 
 ```
 user: get-env either system/platform = 'windows ['username]['user]
@@ -126,7 +126,7 @@ xyloop: func ['p s c /local i] [
 ```
 ▲ I'm gonna **iterate over 2D objects** (images) a lot so better be prepared: I define `xyloop` as sort of a user-defined loop (with the only exception that it also catches `exit`/`return`). It takes a word to hold the coordinate (`p` = point), size (`s` = size) (or object that has a `/size` property) and a block of code (`c` = code).
 <br>
-<p id="spec"></p>
+<a id="spec" name="spec"></a>
 
 ```
 pieces: collect [	foreach spec [
@@ -151,6 +151,7 @@ pieces: collect [	foreach spec [
 </small>You can see it's a `J`, but in the code I omitted the extra spaces since I'm only concerned about `+`s.
 
 <br>
+
 ▼ [`foreach`](#spec) loop **transforms each** spec line into a **separate image**:
 ```
 	w: length? spec: next spec
@@ -164,7 +165,7 @@ pieces: collect [	foreach spec [
 
 `xyloop` loops over the `p` image (doing `w * w` iterations), putting coordinates into `o` (for offset): e.g. 1x1, 2x1, 3x1, 1x2, 2x2, and so on. When `"+"` is encountered, the color of point of `p` at offset `o` is changed from white to what's defined by `spec`. <small>`get` is there because colors are just words and weren't evaluated into color (tuple) values.</small>
 <br>
-<p id="sheen"></p>
+<a id="sheen" name="sheen"></a>
 
 ```
 grad: collect [foreach x #{FF F0 C8 5A FF} [keep 0.0.0.1 * x + white]]
@@ -181,9 +182,10 @@ Then `sheen` is assigned a new image (`glass` = filled with transparent color) a
 `(coal + 0.0.0.160)` adds transparency to the `coal` color to make it look softer.
 
 <br>
+
 ## Finally, meaningful functions
 
-##### Render
+#### Render
 
 This is a more or less **generic rendering mechanism** that takes:
 - a `map` - an image where 1 pixel should expand into 1 visible block: this will be either the whole game area or only one tetromino
@@ -207,7 +209,8 @@ render: function [map stor init plan] [
 - `bind` allows me to give meaning to words `p` and `o` from inside the `plan` declared in another function.
 
 <br>
-##### Render-map
+
+#### Render-map
 
 A wrapper of `render` that renders the** whole game area**, given to it as `map` argument.
 ```
@@ -221,7 +224,8 @@ The `plan` contains a coordinate translation at which then a solid square `block
 <small>As you probably know the operators in Red/Rebol have no precedence and are evaluated from left to right (`-` then `*` in this case).</small>
 
 <br>
-##### Render-next
+
+#### Render-next
 
 It's a tiny widget in the upper left corner that shows the **next tetromino** *(piece)* that will appear (given to it as `pc` argument). It wraps `render` to do so.
 ```
@@ -235,7 +239,8 @@ Here I could care less about flickering, so I'm giving `stor` only one block `[[
 And `plan` is the same idea as before, with minor adjustments: semi-transparent blocks and more sophisticated positioning to account for the text label.
 
 <br>
-##### Summon-pc
+
+#### Summon-pc
 
 Takes the **next tetromino** and allows it to be moved/rotated, and also chooses **another random** one to be the next.
 ```
@@ -255,7 +260,8 @@ Then I need to try to summon the piece **as high as possible** but it must be wh
 `pc-pos` is a global word that contains the current tetromino offset in the game map. It's `x` offset is calculated from the map size and the tetromino size, and `y` offset is being tried continuously from `-3` to `1`, until [`imprint`](#imprint) function stops returning `bad` flag (which means that some occlusion happened and I should continue trying).
 
 <br>
-##### Imprint
+
+#### Imprint
 
 Globally I have two maps of the game area - **`map`** that only contains the **stationary blocks**, and **`map'`** that is a copy of `map` with the currently **moving tetromino imprinted** on it. In both maps one pixel is one block, that's why they're *maps*.
 
@@ -281,7 +287,8 @@ There's a couple of conditions checked: non-white points of `pc` should fit into
 In case any of these conditions fail, `bad` flag is returned - from the `xyloop` <small>(I could've used `break/return 'bad` as well, but since `xyloop` is a function normal return works also)</small>. The result is saved (into `r:`) to be returned, and if it's *not* a `bad` flag then the `map'` is actually rendered on the `/draw` facet of `canvas` face dedicated for that purpose. This is why when *Space* key is pressed, the **tetromino runs down** line by line and not just pops up at the bottom - **`imprint` draws it** while being called repeatedly by [`advance`](#advance).
 
 <br>
-##### Rotate
+
+#### Rotate
 
 What can be simpler than **rotate a tetromino**? Thing is however that `rotate` keyword used by `draw` expects a pair of **integer** coordinates, but in case of 3x3 and 5x5 tetrominoes the center appears at **1.5x1.5 and 2.5x2.5** points and is impossible to express with `pair!` datatype *yet*.
 ```
@@ -312,7 +319,8 @@ I **rotate** `pc` <small>(global word referring to the current tetromino)</small
 Now all that's left is try to `imprint` the rotated piece and restore it when that fails (with `bad` flag).
 
 <br>
-##### Advance
+
+#### Advance
 
 Supposedly triggered by timer (or key press) this func should **move the tetromino** in some direction, specified with `by` argument: -1x0/1x0 for left/right, 0x1 for downward shift.
 `/force` is used to move the piece until it hits the bottom.
@@ -335,7 +343,8 @@ Fails? Restore the correct position, imprint it there. If it was a downward move
 This happens once if `/force` was not specified. Otherwise until `imprint` returns `bad` and thus `break` quits the loop.
 
 <br>
-##### Clean
+
+#### Clean
 
 Does 3 things:
 - **scans** the game field for **complete horizontal lines**
@@ -382,6 +391,7 @@ I need two things from `lines`: **show** and **hide** them repeatedly, and **hol
 ▲ Line visibility state changes every time until it's destroyed and is no more a *complete* line: `ln/extra % 2` switches from 0 to 1 and back, ` = 1` transforms that into false/true values.
 
 <small>
+
 Full function source overview for convenience:
 ```
 clean: function [] [
@@ -399,9 +409,11 @@ clean: function [] [
 	]
 ]
 ```
+
 </small>
 
 <br>
+
 ### Hall of Fame support
 
 This part is mostly **boring** and contains the **bloat** necessary to interface with the bloated external system. Although...
@@ -427,6 +439,7 @@ This operation **takes a while** (up to a few seconds), so it's a good practice 
 Function returns `true` in case everything's good (the server returns 200 OK) so the calling func may tell the user if his precious score was recorded or blocked by Illuminati firewalls.
 
 <br>
+
 ### Game over logic
 
 Once [`summon-pc`](#summon-pc) fails it calls `game-over`.
@@ -511,6 +524,7 @@ Okay, now that window is closed, time for the primary game-over window.
 - by hitting "Quit" in which case the program stops.
 
 <small>
+
 Full function source overview for convenience:
 ```
 game-over: has [lowest saved] [
@@ -542,6 +556,7 @@ game-over: has [lowest saved] [
 	restart
 ]
 ```
+
 </small>
 
 ### Restart
@@ -553,13 +568,14 @@ restart: does [set rea rea'  rea/t0: now'  map': copy map: make image! sz/map  s
 
 `rea/t0` is assigned the current time, that will be used to advance the **game clock** (minus moments when it's paused).
 
-<p id="rea"></p>
+<a id="rea" name="rea"></a>
 
 `rea` is right below. It's a **reactor** object that contains all the data that (by my design) when changed will **trigger some events**. `rea'` simply contains it's initial state so it's easier to reset `rea` back. `set rea rea'` does just that by overwriting all fields of `rea` with those from `rea'`. 
 <small>Note that `rea'` is technically a reactor too but it won't "work" since `copy` does not register any new reactive relations.</small>
-<p id="pause0"></p>
+<a id="pause0" name="pause0"></a>
 
 ### Reactive stuff
+<a id="scores" name="scores"></a>
 
 ```
 rea': copy rea: make deep-reactor! [
@@ -582,7 +598,6 @@ rea': copy rea: make deep-reactor! [
 *<center>interval = 2<sup> ―t/T<sub><small>1/2</small></sub></sup></center>*
 
 I hold scores as a block: `[score player score player ...]`
-<p id="scores"></p>
 
 Interesting thing is that I make them **automatically sorted** and cut to the **length of 10** pairs (score + name). `sort/skip/reverse scores 2` sorts scores (in descending order) using each 1st of 2 items as the key. `clear skip .. 20` part removes everything after the 20th item, and `head` returns the head of the block rather than the point at which it was cleared.
 I define `scores` twice because the sorting expression requires scores already be defined, so the 1st definition acts as an initial state, while the 2nd defines a reactive relation with `is` operator.
@@ -625,16 +640,17 @@ I declare a `keys` function that accepts some chars (as a string `s`) + some wor
 
 Then I declare which keys should trigger what actions. Note that Down/Left/Right keys do almost the same - move the tetromino, only in different directions. So instead of declaring:
 <small>
-> ```
+```
 	keys "2s" [down] [advance 0x1]
 	keys "4a" [left] [advance -1x0]
 	keys "6d" [right] [advance 1x0]
 ```
 
+<a id="pause1" name="pause1"></a>
 </small>I **arrange the keys in triplets** and deal with the index `i` in the triplet to choose a proper move direction.
 Tip: `^M` = 13 is Enter key, `^[` = 27 is Esc.
+
 <br>
-<p id="pause1"></p>
 
 ```
 		rate 0:0:1 on-time [
@@ -693,25 +709,25 @@ I'm making a new image and drawing a **translucent grid** on it, then passing it
 ```
 	at 0x0 base' (sz/■ * 5x7) react [face/draw: redraw-next rea/next-pc]
 ```
+<a id="pause2" name="pause2"></a>
 ▲ Transparent base 5x7 blocks in size to display the **next tetromino**. Note how the reactive relation should include the trigger - `rea/next-pc`, that causes a redraw.
 <br>
-<p id="pause2"></p>
 
 ```
 	at 0x0 canvas: base' (sz/full) on-created [restart] rate 30 on-time [clean]
 ```
+<a id="pause3" name="pause3"></a>
 ▲ Another base - `canvas` - on which all the blocks are being drawn. It also serves as a trigger for game start event ([`restart`](#restart)) and performs the scan of the game area with [`clean`](#clean) 30 times per second. The number affects how fast the lightning effect happens. <small>It's name is used in the [`imprint` func](#imprint).</small>
 <br>
-<p id="pause3"></p>
 
 ```
 	at (sz/full - sz/band / 2 * 0x1)
 		base' (sz/band) bold font-size 30 "Taking a breath..."
 		react [face/visible?: rea/pause]
 ```
+<a id="lines" name="lines"></a>
 ▲ This is the huge text announcement that appears visible when `rea/pause` is true. Size is adjusted so it sits at the center vertically.
 <br>
-<p id="lines"></p>
 
 ```
 	style line: base' hidden (sz/line) extra 0 (lines: [])
@@ -741,6 +757,7 @@ I'm making a new image and drawing a **translucent grid** on it, then passing it
 <br>
 
 <small>
+
 Full window source overview for convenience:
 ```
 view/tight/options [
@@ -792,9 +809,11 @@ view/tight/options [
 	(append/dup [] [at 0x0 line] sz/map/y)
 ] → [] [text: "Retris 1.0"]
 ```
+
 </small>
 
 <br>
+
 ###### Found something obscure yet unexplained?
 Ask me in [gitter](https://gitter.im/hiiamboris).
 
