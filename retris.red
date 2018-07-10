@@ -10,7 +10,7 @@ Red [
 now': does [now/time/precise]
 random/seed now'
 
-half-life: 90
+half-life: 0:01:30
 sz: context [
 	■': block': 0.7 * ■: block: 17x17
 	full: ■ * map: 15x30
@@ -105,7 +105,7 @@ advance: func [by /force /local prev-pos] [
 
 clean: function [] [
 	repeat y h: sz/map/y [
-		if repeat x sz/map/x [
+		if full: repeat x sz/map/x [
 			also yes  if white = map/(as-pair x y) [break/return no]
 		] [
 			ln: lines/:y
@@ -160,7 +160,7 @@ restart: does [set rea rea'  rea/t0: now'  map': copy map: make image! sz/map  s
 
 rea': copy rea: make deep-reactor! [
 	elapsed: 0:0:0  score: 0  pause: no  t0: is [elapsed pause now']  next-pc: none
-	interval: is [0.5 ** ((to-float elapsed) / half-life)]
+	interval: is [0.5 ** (elapsed / half-life)]
 	scores: []  scores: is [head clear skip sort/skip/reverse scores 2 20]
 ]
 
