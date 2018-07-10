@@ -3,17 +3,16 @@ Red [title: "Tetris Redborn XS!" description: "Minimal version of Retris" licens
 random/seed now/precise/time
 
 sz: context [
-	block: 16x16  map: 16x32
-	full: map * block
+	block: 17x17  full: block * map: 15x30
 	line: as-pair full/x block/y
 ]
 
 bgimg: any [
-	attempt/safer [load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]]
+	attempt [load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random]]
 	make image! sz/full
 ]
 
-xyloop: func ['p s c /local i] [
+xyloop: function ['p s c] [
 	any [pair? s  s: s/size]
 	i: 0	loop s/x * s/y [
 		set p 1x1 + as-pair i % s/x i / s/x
@@ -21,29 +20,27 @@ xyloop: func ['p s c /local i] [
 	i: i + 1	]
 ]
 
-pieces: collect [
-	foreach spec [
-		[cyan "" "++++" "" ""]
-		[blue "+" "+++" ""]
-		[brown "  +" "+++" ""]
-		[yellow "++" "++"]
-		[green " ++" "++" ""]
-		[purple " +" "+++" ""]
-		[red "++" " ++" ""]
-	] [
-		c: get spec/1
-		w: length? spec: next spec
-		keep p: make image! 1x1 * w
-		xyloop o p [ if #"+" = spec/(o/y)/(o/x) [p/:o: c] ]
-	]
-]
+pieces: collect [	foreach spec [
+	[cyan "" "++++" "" ""]
+	[blue "+" "+++" ""]
+	[brown "  +" "+++" ""]
+	[yellow "++" "++"]
+	[green " ++" "++" ""]
+	[purple " +" "+++" ""]
+	[red "++" " ++" ""]
+] [
+	w: length? spec: next spec
+	keep p: make image! 1x1 * w
+	xyloop o p [ if #"+" = spec/(o/y)/(o/x) [p/:o: get spec/-1] ]
+] ]
 
 redraw: function [] [
-	canvas/draw: collect [ xyloop o map' [
-		if white <> p: map'/:o [
-			o1: (o2: sz/block * o) - sz/block
-			keep reduce ['pen 'coal 'fill-pen p 'box o1 o2 sz/block/x / 5]
-		]]]
+	cnv/draw: collect [
+		xyloop o map' [
+			if white <> p: map'/:o [
+				o1: (o2: sz/block * o) - sz/block
+				keep reduce ['pen 'coal  'fill-pen p  'box o1 o2 sz/block/x / 5]
+	]	]	]
 ]
 
 draw-pc: does [
@@ -57,11 +54,9 @@ imprint: has [o p r] [
 	also r: xyloop o pc [
 		if white <> pc/:o [
 			p: o + pc-pos
-			unless all [ within? p 1x1 sz/map  white = map'/:p ] 
-				[return 'bad]
+			unless all [ within? p 1x1 sz/map  white = map'/:p ] [return 'bad]
 			map'/:p: pc/:o
-		]
-	]
+	]	]
 	if 'bad <> r [redraw]
 ]
 
@@ -74,7 +69,8 @@ rotate: has [p] [
 advance: func [by /force /local bk] [
 	until [
 		pc-pos: by + bk: pc-pos
-		any [	all ['bad = imprint (also  pc-pos: bk  if 0 <> by/y [imprint  map: map'  draw-pc])]
+		any [	all ['bad = imprint
+						also  pc-pos: bk  if 0 <> by/y [imprint  map: map'  draw-pc]]
 				not force ]
 	]
 	imprint
@@ -83,26 +79,21 @@ advance: func [by /force /local bk] [
 clean: has [x y h] [
 	repeat y h: sz/map/y [
 		if repeat x sz/map/x [
-			if white = map/(as-pair x y) [break/return no]
-			yes
+			also yes if white = map/(as-pair x y) [break/return no]
 		] [ draw map compose [image map crop 0x-1 (as-pair h y)] ]
 	]
 ]
 
-start: does [map': map: make image! sz/map]
+start: does [map': map: make image! sz/map  draw-pc]
 
 view/tight/options compose/deep [
 	base (sz/full)
 		draw [image (bgimg)]
-		rate 1 on-time [advance 0x1]
-		focus on-key [ switch event/key [
-			down [advance 0x1]
-			left [advance -1x0]
-			right [advance 1x0]
-			#" " [advance/force 0x1]
-			up [rotate]
+		rate 2 on-time [advance 0x1]
+		focus on-key [ case [
+			#" " = k: event/key [advance/force 0x1]
+			'up = k [rotate]
+			advance second any [find [down 0x1 left -1x0 right 1x0] k exit]
 		] ] return
-	at 0x0 canvas: base (sz/full) glass  on-created [start draw-pc]  rate 10 on-time [clean]
-] [text: "Retris Mini"]
-
-quit
+	at 0x0 cnv: base (sz/full) glass on-created [start] rate 10 on-time [clean]
+] [text: "Retris Mini 1.0"]
