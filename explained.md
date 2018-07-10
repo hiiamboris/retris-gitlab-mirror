@@ -12,7 +12,7 @@ For the **TLDR-dudes**, the **ideas** are marked in **bold**. For them it might 
 Seasoned **gurus** might just feel content that Reduction goes on ☻
 <br>
 
-[TOC]
+[[_TOC_]]
 <br>
 
 ##### Naming convention
@@ -800,8 +800,7 @@ Ask me in [gitter](https://gitter.im/hiiamboris).
 
 <br>
 
-[TOC]
-
+[[_TOC_]]
 
 
 
