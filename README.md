@@ -3,8 +3,8 @@
 <td><h1>RETRIS -- RED-lang Tetris Demo</h1>
 <br><h2>FILES</h2>
 <table>
-<tr> <td> File <td> Description <td> Binary
-<tr> <td> retris.red <td> <b>The original, including: </b><ul>
+<tr> <td> File <td> Description <td> Binary<a href="#footnote1">*</a>
+<tr> <td> retris.red <td> <b>The 220-line original, including: </b><ul>
     <li> Score calculation & Hall of Fame
     <li> Difficulty increase
     <li> Stats & next piece display
@@ -20,5 +20,8 @@
     <br>It's kept at the very minimum and does not include any of the advanced features
     <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris-xs.exe">binary/win32</a>
 </table>
+<p id="footnote1"><small>* graphics support on other platforms doesn't yet allow running Retris. YOU can help by isolating the problems and <a href="https://github.com/red/red/issues/new">filing new tickets</a></small></p>
+<br><h2>TESTING</h2>
+In case any problem occurs in the binary, try downloading the source and executing `do %retris.red` from the Red console. You can raise issues in this repo or <a href="https://gitter.im/hiiamboris">chat me in Gitter</a>.
 </tr></table>
 
