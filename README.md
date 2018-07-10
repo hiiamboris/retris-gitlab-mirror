@@ -1,7 +1,11 @@
+# RETRIS -- RED-lang Tetris Demo
+
+## <a href="https://gitlab.com/hiiamboris/retris/wikis/RETRIS-Explained"> >> A full step-by-step explanation is now available << </a>
+<br>
+
 <table><tr height="300">
-<td width="20%"><img src="https://gitlab.com/hiiamboris/retris/raw/binary/media/sshot.jpg"></td>
-<td><h1>RETRIS -- RED-lang Tetris Demo</h1>
-<br><h2>FILES</h2>
+<td width="25%"><img src="https://gitlab.com/hiiamboris/retris/raw/binary/media/sshot.jpg"></td>
+<td><h2>FILES</h2>
 <table>
 <tr> <td> File <td> Description <td> Binary<a href="#footnote1">*</a>
 <tr> <td> <a href="https://gitlab.com/hiiamboris/retris/raw/master/retris.red">retris.red</a> <td> <b>The 210-line original, including: </b><ul>
@@ -21,7 +25,7 @@
     <td> <a href="https://gitlab.com/hiiamboris/retris/raw/binary/retris-xs.exe">binary/win32</a>
 </table>
 <p id="footnote1"><small>* graphics support on other platforms doesn't yet allow running Retris. YOU can help by isolating the problems and <a href="https://github.com/red/red/issues/new">filing new tickets</a></small></p>
-<br><h2>TESTING</h2>
+<h2>TESTING</h2>
 In case any problem occurs in the binary, try downloading the source and executing `do %retris.red` from the Red console. You can raise issues in this repo or <a href="https://gitter.im/hiiamboris">chat me in Gitter</a>.
 </tr></table>
 
