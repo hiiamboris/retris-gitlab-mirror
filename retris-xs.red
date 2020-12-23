@@ -39,14 +39,14 @@ redraw: function [] [
 		xyloop o map' [
 			if white <> p: map'/:o [
 				o1: (o2: sz/block * o) - sz/block
-				keep reduce ['pen 'coal  'fill-pen p  'box o1 o2 sz/block/x / 5]
+				keep reduce ['pen 'coal  'fill-pen p  'box o1 o2 to 1 sz/block/x / 5]
 	]	]	]
 ]
 
 draw-pc: does [
 	pc: random/only pieces
 	pc-pos: sz/map - pc/size / 2 + 1x0 * 1x0
-	if 'bad = imprint [view [button "GAME OVER" [quit]]]
+	if all ['bad = imprint unset? :over] [view [over: button focus "GAME OVER" [quit]]]
 ]
 
 imprint: has [o p r] [

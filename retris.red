@@ -17,7 +17,7 @@ sz: context [
 	band: 1x5 * line: as-pair full/x ■/y
 	alpha: size-text/with system/view/screens/1 "O"
 ]
-block': rejoin [block: reduce ['box 0x0 sz/■] sz/■/x / 5]
+block': rejoin [block: reduce ['box 0x0 sz/■] to 1 sz/■/x / 5]
 
 user: get-env either system/platform = 'windows ['username]['user]
 bgimg: any [
@@ -201,7 +201,7 @@ view/tight/options [
 	at 0x0 canvas: base' (sz/full) on-created [restart] rate 30 on-time [clean]
 
 	at (sz/full - sz/band / 2 * 0x1)
-		base' (sz/band) middle bold font-size 30 "Taking a breath..."
+		base' (sz/band) middle bold font-size 30 "Taking a ^/breath..."
 		react [face/visible?: rea/pause]
 
 	style line: base' hidden (sz/line) extra 0 (lines: [])
