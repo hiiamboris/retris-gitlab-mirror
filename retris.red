@@ -19,7 +19,7 @@ sz: context [
 ]
 block': rejoin [block: reduce ['box 0x0 sz/■] to 1 sz/■/x / 5]
 
-user: get-env either system/platform = 'windows ['username]['user]
+user: any [get-env either system/platform = 'windows ['username]['USER] "Unknown"]
 bgimg: any [
 	attempt/safer [ load rejoin [https://picsum.photos/ sz/full/x '/ sz/full/y '?random] ]
 	make image! sz/full
