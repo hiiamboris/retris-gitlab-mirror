@@ -86,7 +86,7 @@ imprint: has [o p r] [
 	r
 ]
 
-rotate: has [p /back] [
+rotate: func [/back /local p] [
 	draw pc [matrix [0 1 -1 0 (pc/size/x) 0] (pick [invert-matrix []] back) image pc] → []
 	if 'bad = imprint [rotate/back  imprint]
 ]
